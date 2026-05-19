@@ -377,7 +377,8 @@ This is a learning project, but suggestions are welcome! Feel free to:
 
 ## 📄 License
 
-MIT License - feel free to use for learning purposes.
+This project is shared for portfolio and evaluation purposes only.
+Unauthorized copying, distribution, or commercial use is not permitted.
 
 ---
 
