@@ -174,7 +174,7 @@ def find_message_by_id(id_str: str) -> tuple:
     if not id_str.isdigit():
         return None, (jsonify({'error': 'Message ID must be a number'}), 400)
 
-    message = next((m for m in messages if m['id'] == int(id_str)), None)
+    message = next((message for message in messages if message['id'] == int(id_str)), None)
     if not message:
         return None, (jsonify({'error': f'Message with ID {int(id_str)} not found'}), 404)
 
@@ -278,18 +278,18 @@ def get_messages() -> Response:
             return jsonify({'error': 'No messages found'}), 404
 
         # Work on a copy so filters never mutate the original list
-        filtered = messages.copy()
+        filtered_messages = messages.copy()
 
         if status:
-            filtered = [m for m in filtered if m['status'] == status]
+            filtered_messages = [message for message in filtered_messages if message['status'] == status]
 
         if phone:
-            filtered = [m for m in filtered if m['phone'] == phone]
+            filtered_messages = [message for message in filtered_messages if message['phone'] == phone]
 
         # Sort descending by timestamp so the latest message appears first
-        filtered = sorted(filtered, key=lambda m: m['timestamp'], reverse=True)
+        filtered_messages = sorted(filtered_messages, key=lambda message: message['timestamp'], reverse=True)
 
-        return jsonify({'messages': filtered, 'count': len(filtered)}), 200
+        return jsonify({'messages': filtered_messages, 'count': len(filtered_messages)}), 200
 
     except Exception as e:
         print(f"Error in get_messages: {e}")
@@ -319,18 +319,18 @@ def get_keyword_messages() -> Response:
         if not messages:
             return jsonify({'error': 'No messages found'}), 404
 
-        filtered = messages.copy()
+        filtered_messages = messages.copy()
 
         if search_query:
             # Case-insensitive substring match — keeps search flexible for partial words
-            filtered = [
-                m for m in filtered
-                if search_query.lower() in m['message'].lower()
+            filtered_messages = [
+                message for message in filtered_messages
+                if search_query.lower() in message['message'].lower()
             ]
 
-        filtered = sorted(filtered, key=lambda m: m['timestamp'], reverse=True)
+        filtered_messages = sorted(filtered_messages, key=lambda message: message['timestamp'], reverse=True)
 
-        return jsonify({'messages': filtered, 'count': len(filtered)}), 200
+        return jsonify({'messages': filtered_messages, 'count': len(filtered_messages)}), 200
 
     except Exception as e:
         print(f"Error in get_keyword_messages: {e}")
@@ -372,7 +372,7 @@ def bulkProcess_messages() -> Response:
             already_processed = []
 
             for id in message_ids:
-                message = next((m for m in messages if m['id'] == id), None)
+                message = next((message for message in messages if message['id'] == id), None)
 
                 if not message:
                     not_found.append(id)
@@ -451,7 +451,7 @@ def bulkFail_messages() -> Response:
             already_failed    = []
 
             for id in message_ids:
-                message = next((m for m in messages if m['id'] == id), None)
+                message = next((message for message in messages if message['id'] == id), None)
 
                 if not message:
                     not_found.append(id)
@@ -541,12 +541,12 @@ def get_stats() -> Response:
             return jsonify({'error': 'No messages found'}), 404
 
         total_messages = len(messages)
-        pending        = len([m for m in messages if m['status'] == 'pending'])
-        processed      = len([m for m in messages if m['status'] == 'processed'])
-        failed         = len([m for m in messages if m['status'] == 'failed'])
+        pending        = len([message for message in messages if message['status'] == 'pending'])
+        processed      = len([message for message in messages if message['status'] == 'processed'])
+        failed         = len([message for message in messages if message['status'] == 'failed'])
 
         # A set of phone numbers naturally deduplicates repeated senders
-        unique_senders = len(set(m['phone'] for m in messages))
+        unique_senders = len(set(message['phone'] for message in messages))
 
         # Tally message counts per hour to find the busiest time window
         hour_counts: dict[int, int] = {}
@@ -593,7 +593,7 @@ def delete_message(id: str) -> Response:
             return error
 
         # Rebuild the list excluding the deleted message
-        messages = [m for m in messages if m['id'] != int(id)]
+        messages = [message for message in messages if message['id'] != int(id)]
 
         return jsonify({'message': 'Message deleted successfully'}), 200
 
